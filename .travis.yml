@@ -32,6 +32,8 @@ jobs:
         - "TYPE=${TRAVIS_TAG##*/}"
         - "[ ! '$TYPE' = 'release' ] || TYPE='patch'"
         - dappnodesdk publish ${TYPE} -p infura -a ${DEV}
+      node_js:
+        - "10.15.3"
       before_deploy:
         - wget https://raw.githubusercontent.com/dappnode/DAppNode/master/scripts/before_deploy.sh
         - source before_deploy.sh
