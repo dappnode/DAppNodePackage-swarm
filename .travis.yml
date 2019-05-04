@@ -31,7 +31,7 @@ jobs:
         - docker-compose build
         - "TYPE=${TRAVIS_TAG##*/}"
         - "[ ! '$TYPE' = 'release' ] || TYPE='patch'"
-        - dappnodesdk publish ${TYPE} -p infura
+        - dappnodesdk publish ${TYPE} -p infura -a ${DEV}
       before_deploy:
         - wget https://raw.githubusercontent.com/dappnode/DAppNode/master/scripts/before_deploy.sh
         - source before_deploy.sh
