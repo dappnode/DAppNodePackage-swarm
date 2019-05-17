@@ -1,29 +1,100 @@
-#!/bin/sh
+#!/bin/bash
 
 set -o errexit
 set -o pipefail
 set -o nounset
 
+ADDRESS=${ADDRESS:-}
 PASSWORD=${PASSWORD:-}
-DATADIR=${DATADIR:-/root/.ethereum/}
+DATADIR=${DATADIR:-/root/.ethereum}
 PORT=${PORT:-30399}
 BZZPORT=${BZZPORT:-8500}
+KEYSTORE_PATH=${DATADIR}/keystore
+ENS=${ENS:-"314159265dD8dbb310642f98f50C066173C1259b"}
 
-if [ "$PASSWORD" == "" && ! -f /password ]; then 
-  PASSWORD=$(echo $(LC_CTYPE=C tr -dc 'A-HJ-NPR-Za-km-z2-9' < /dev/urandom | head -c 20))
-  echo $PASSWORD | tee /password
+
+if [ "$PASSWORD" == '' ]; then 
+    if [ -z "${ADDRESS}" ]; then
+        # Search for an account and a password
+        while read ADDRESS; do
+            if [ -f ${KEYSTORE_PATH}/.password_$ADDRESS ];then
+                export ADDRESS=${ADDRESS}
+                export PASSWORD_PATH=${KEYSTORE_PATH}/.password_${ADDRESS}
+                break
+            fi
+        done <<< "$(geth account list | awk -F " " '{print $3}' | tr -d '{}')"
+        # Create a new address and password
+        if [ -z "${ADDRESS}" ];then
+            # Create a random password
+            export PASSWORD=$(echo $(LC_CTYPE=C tr -dc 'A-HJ-NPR-Za-km-z2-9' < /dev/urandom | head -c 20))
+            geth --datadir $DATADIR --password  <(echo $PASSWORD) account new
+            PASSWORD_FILE=$(echo $(echo ".password_"$(geth account list | awk -F " " '{print $3}' | tr -d '{}')))
+            echo $PASSWORD > ${KEYSTORE_PATH}/$PASSWORD_FILE
+            while read ADDRESS; do
+                if [ -f $KEYSTORE_PATH/.password_$ADDRESS ];then
+                    export ADDRESS=$ADDRESS
+                    export PASSWORD_PATH=$KEYSTORE_PATH/.password_$ADDRESS
+                    break
+                fi
+            done <<< "$(geth account list | awk -F " " '{print $3}' | tr -d '{}')"
+        fi
+    else
+        EXISTS=$(grep -qi ${ADDRESS/0x/} ${KEYSTORE_PATH}/*)
+        RESULT=$?
+        if [ ${RESULT} -eq 0 ] && [ -f ${KEYSTORE_PATH}/.password_${ADDRESS} ];then
+            export PASSWORD_PATH=${KEYSTORE_PATH}/.password_${ADDRESS}
+        else
+            if [ ${RESULT} -ne 0 ];then
+                echo "the account ${ADDRESS} file could not be found"
+                ### TODO wait until user upload .password file
+                ### add instructions or link
+            elif [ ! -f ${KEYSTORE_PATH}/.password_${ADDRESS} ];then
+                echo "the password file for the account ${ADDRESS} could not be found"
+                ### TODO wait until user upload .password file and load parameters
+                ### add instructions or link
+            fi
+        fi
+    fi
+else
+    if [ -n "${ADDRESS}" ]; then
+        ADDRESS=${ADDRESS,,}
+        echo $PASSWORD > ${KEYSTORE_PATH}/.password_${ADDRESS/0x/}
+        PASSWORD_PATH="${KEYSTORE_PATH}/.password_${ADDRESS}"
+        EXISTS=$(grep -qi ${ADDRESS/0x/} ${KEYSTORE_PATH}/*)
+        RESULT=$?
+        if [ ${RESULT} -eq 0 ];then
+            export PASSWORD_PATH=${KEYSTORE_PATH}/.password_${ADDRESS}
+        else
+            if [ ${RESULT} -ne 0 ];then
+                echo "the account ${ADDRESS} file could not be found"
+                exit 1
+                ### TODO wait until user upload .password file
+                ### add instructions or link
+            fi
+        fi
+    else
+        EXISTS=$(grep -il ${PASSWORD} ${KEYSTORE_PATH}/.*)
+        RESULT=$?
+        if [ ${RESULT} -eq 0 ];then
+            export ADDRESS=$(echo $EXISTS | awk -F "_" '{print $2}')
+            export PASSWORD_PATH=$EXISTS
+        else
+            onboarder -p ${PASSWORD}
+            EXISTS=$(grep -il ${PASSWORD} /root/.raiden/keystore/.*)
+            RESULT=$?
+            if [ ${RESULT} -eq 0 ];then
+                export ADDRESS=$(echo $EXISTS | awk -F "_" '{print $2}')
+                export PASSWORD_PATH=$EXISTS
+            fi
+        fi
+    fi
 fi
-
-KEYFILE=`find $DATADIR | grep UTC | head -n 1` || true
-if [ ! -f "$KEYFILE" ]; then echo "No keyfile found. Generating..." && geth --datadir $DATADIR --password /password account new; fi
-KEYFILE=`find $DATADIR | grep UTC | head -n 1` || true
-if [ ! -f "$KEYFILE" ]; then echo "Could not find nor generate a BZZ keyfile." && exit 1; else echo "Found keyfile $KEYFILE"; fi
 
 VERSION=`swarm version`
 echo "Running Swarm:"
 echo $VERSION
 
-export BZZACCOUNT="`echo -n $KEYFILE | tail -c 40`" || true
-if [ "$BZZACCOUNT" == "" ]; then echo "Could not parse BZZACCOUNT from keyfile." && exit 1; fi
+if [ "$ADDRESS" == "" ]; then echo "Could not parse $ADDRESS from keyfile." && exit 1; fi
+export BZZACCOUNT="0x${ADDRESS}"
 
-exec swarm --ens-api 314159265dD8dbb310642f98f50C066173C1259b@http://my.ethchain.dnp.dappnode.eth:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password /password --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* $@ 2>&1
+exec swarm --ens-api ${ENS}@http://fullnode.dappnode:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password ${PASSWORD_PATH} --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* --ws --wsorigins="*" --wsaddr 0.0.0.0 --wsport 8546 ${EXTRA_OPTS} $@ 2>&1

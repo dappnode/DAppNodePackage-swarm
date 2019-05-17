@@ -22,4 +22,4 @@ COPY --from=build /usr/local/bin/geth /usr/local/bin/geth
 
 COPY ./run.sh /usr/local/bin/
 
-CMD bash -x /usr/local/bin/run.sh
+ENTRYPOINT [ "run.sh" ]
