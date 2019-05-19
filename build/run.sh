@@ -11,7 +11,10 @@ PORT=${PORT:-30399}
 BZZPORT=${BZZPORT:-8500}
 KEYSTORE_PATH=${DATADIR}/keystore
 ENS=${ENS:-"314159265dD8dbb310642f98f50C066173C1259b"}
+EXTRA_OPTS=${EXTRA_OPTS:-}
 
+# Load BOOTNODES env var
+source /usr/src/app/swarm-gateways
 
 if [ "$PASSWORD" == '' ]; then 
     if [ -z "${ADDRESS}" ]; then
@@ -22,13 +25,13 @@ if [ "$PASSWORD" == '' ]; then
                 export PASSWORD_PATH=${KEYSTORE_PATH}/.password_${ADDRESS}
                 break
             fi
-        done <<< "$(geth account list | awk -F " " '{print $3}' | tr -d '{}')"
+        done <<< "$(geth account list 2>/dev/null | awk -F " " '{print $3}' | tr -d '{}')"
         # Create a new address and password
         if [ -z "${ADDRESS}" ];then
             # Create a random password
             export PASSWORD=$(echo $(LC_CTYPE=C tr -dc 'A-HJ-NPR-Za-km-z2-9' < /dev/urandom | head -c 20))
-            geth --datadir $DATADIR --password  <(echo $PASSWORD) account new
-            PASSWORD_FILE=$(echo $(echo ".password_"$(geth account list | awk -F " " '{print $3}' | tr -d '{}')))
+            geth account new --datadir $DATADIR --password <(echo $PASSWORD)
+            PASSWORD_FILE=$(echo $(echo ".password_"$(geth account list 2>/dev/null | awk -F " " '{print $3}' | tr -d '{}' | head -1 )))
             echo $PASSWORD > ${KEYSTORE_PATH}/$PASSWORD_FILE
             while read ADDRESS; do
                 if [ -f $KEYSTORE_PATH/.password_$ADDRESS ];then
@@ -36,7 +39,7 @@ if [ "$PASSWORD" == '' ]; then
                     export PASSWORD_PATH=$KEYSTORE_PATH/.password_$ADDRESS
                     break
                 fi
-            done <<< "$(geth account list | awk -F " " '{print $3}' | tr -d '{}')"
+            done <<< "$(geth account list 2>/dev/null | awk -F " " '{print $3}' | tr -d '{}')"
         fi
     else
         EXISTS=$(grep -qi ${ADDRESS/0x/} ${KEYSTORE_PATH}/*)
@@ -73,19 +76,20 @@ else
             fi
         fi
     else
-        EXISTS=$(grep -il ${PASSWORD} ${KEYSTORE_PATH}/.*)
-        RESULT=$?
-        if [ ${RESULT} -eq 0 ];then
-            export ADDRESS=$(echo $EXISTS | awk -F "_" '{print $2}')
-            export PASSWORD_PATH=$EXISTS
-        else
-            onboarder -p ${PASSWORD}
-            EXISTS=$(grep -il ${PASSWORD} /root/.raiden/keystore/.*)
+        EXISTS=$(grep -i ${PASSWORD} ${KEYSTORE_PATH}/.* || echo "")
+        if [ -n ${EXISTS} ];then
+            geth account new --datadir $DATADIR --password <(echo $PASSWORD)
+            PASSWORD_FILE=$(echo $(echo ".password_"$(geth account list 2>/dev/null | awk -F " " '{print $3}' | tr -d '{}' | head -1 )))
+            echo $PASSWORD > ${KEYSTORE_PATH}/$PASSWORD_FILE
+            EXISTS=$(grep -il ${PASSWORD} ${KEYSTORE_PATH}/.* )
             RESULT=$?
             if [ ${RESULT} -eq 0 ];then
                 export ADDRESS=$(echo $EXISTS | awk -F "_" '{print $2}')
                 export PASSWORD_PATH=$EXISTS
-            fi
+            fi    
+        else
+            export ADDRESS=$(echo $EXISTS | awk -F "_" '{print $2}')
+            export PASSWORD_PATH=$EXISTS
         fi
     fi
 fi
@@ -97,4 +101,4 @@ echo $VERSION
 if [ "$ADDRESS" == "" ]; then echo "Could not parse $ADDRESS from keyfile." && exit 1; fi
 export BZZACCOUNT="0x${ADDRESS}"
 
-exec swarm --ens-api ${ENS}@http://fullnode.dappnode:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password ${PASSWORD_PATH} --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* --ws --wsorigins="*" --wsaddr 0.0.0.0 --wsport 8546 ${EXTRA_OPTS} $@ 2>&1
+exec swarm --bootnodes "$BOOTNODES" --ens-api ${ENS}@http://fullnode.dappnode:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password ${PASSWORD_PATH} --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* --ws --wsorigins="*" --wsaddr 0.0.0.0 --wsport 8546 $EXTRA_OPTS $@ 2>&1

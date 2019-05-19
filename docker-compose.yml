@@ -3,11 +3,14 @@ services:
     swarm.dnp.dappnode.eth:
         image: 'swarm.dnp.dappnode.eth:0.1.0'
         build: ./build
+        ports: 
+            - 8500:8500
         volumes:
             - 'swarm:/root/.ethereum'
         environment:
-            - PASSWORD=edu
+            - PASSWORD=
             - PORT=30399
             - BZZPORT=8500
+        dns: 172.33.1
 volumes:
     swarm: {}
