@@ -1,13 +1,13 @@
 {
   "name": "swarm.dnp.dappnode.eth",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Swarm is a distributed storage platform and content distribution service, a native base layer service of the ethereum web3 stack (Swarm v0.4.2)",
   "avatar": "/ipfs/QmaGwyZCjAjHH6FkjGMk31bFphDG374xT5qws8ZGVgxPHP",
   "type": "library",
   "image": {
-    "path": "swarm.dnp.dappnode.eth_0.2.0.tar.xz",
-    "hash": "/ipfs/QmRUArvvHHkTTcC2aNiB4gpzFEyLtf6ka4YLfuhHZSnARa",
-    "size": 21801606,
+    "path": "",
+    "hash": "",
+    "size": "",
     "restart": "always",
     "volumes": [
       "swarm:/root/.ethereum"
