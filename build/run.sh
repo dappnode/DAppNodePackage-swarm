@@ -13,9 +13,6 @@ KEYSTORE_PATH=${DATADIR}/keystore
 ENS=${ENS:-"314159265dD8dbb310642f98f50C066173C1259b"}
 EXTRA_OPTS=${EXTRA_OPTS:-}
 
-# Load BOOTNODES env var
-source /usr/src/app/swarm-gateways
-
 if [ "$PASSWORD" == '' ]; then 
     if [ -z "${ADDRESS}" ]; then
         # Search for an account and a password
@@ -101,4 +98,4 @@ echo $VERSION
 if [ "$ADDRESS" == "" ]; then echo "Could not parse $ADDRESS from keyfile." && exit 1; fi
 export BZZACCOUNT="0x${ADDRESS}"
 
-exec swarm --bootnodes "$BOOTNODES" --ens-api ${ENS}@http://fullnode.dappnode:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password ${PASSWORD_PATH} --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* --ws --wsorigins="*" --wsaddr 0.0.0.0 --wsport 8546 $EXTRA_OPTS $@ 2>&1
+exec swarm --ens-api ${ENS}@http://fullnode.dappnode:8545 --bzzport=$BZZPORT --port=$PORT --bzzaccount=$BZZACCOUNT --password ${PASSWORD_PATH} --httpaddr 0.0.0.0 --datadir $DATADIR --corsdomain=* --ws --wsorigins="*" --wsaddr 0.0.0.0 --wsport 8546 $EXTRA_OPTS $@ 2>&1

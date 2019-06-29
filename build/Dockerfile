@@ -1,28 +1,22 @@
-FROM alpine:3.9 as build
+FROM alpine:3.9 as build-swarm
+
+WORKDIR /usr/src/app
+
+# Swarm 0.4.2
+ENV BRANCH v0.4.2 
 
 RUN apk add --update git go make gcc musl-dev linux-headers bash pwgen
-RUN git clone https://github.com/ethereum/go-ethereum.git
-
-# Swarm 0.4.0
-ENV COMMIT c3b317a4 
-
-RUN \
-  (cd go-ethereum &&  git checkout ${COMMIT} && make geth && make swarm)  && \
-  cp go-ethereum/build/bin/geth /usr/local/bin/                          && \
-  cp go-ethereum/build/bin/swarm /usr/local/bin/                         && \
-  apk del git go make gcc musl-dev linux-headers                         && \
-  rm -rf /go-ethereum && rm -rf /var/cache/apk/*
+RUN git clone -b ${BRANCH} https://github.com/ethersphere/swarm.git /usr/src/app && \
+  make swarm            
 
 FROM alpine:3.9 
 
 WORKDIR /usr/src/app
 
-RUN apk add --update pwgen bash
+RUN apk add --update pwgen bash geth
 
-COPY --from=build /usr/local/bin/swarm /usr/local/bin/swarm
-COPY --from=build /usr/local/bin/geth /usr/local/bin/geth
+COPY --from=build-swarm /usr/src/app/build/bin/swarm /usr/local/bin/swarm
 
-COPY ./run.sh /usr/local/bin/
-COPY swarm-gateways /usr/src/app
+COPY run.sh /usr/local/bin/
 
 ENTRYPOINT [ "run.sh" ]

@@ -1,13 +1,13 @@
 {
   "name": "swarm.dnp.dappnode.eth",
-  "version": "0.1.0",
-  "description": "Swarm is a distributed storage platform and content distribution service, a native base layer service of the ethereum web3 stack (Swarm v0.4.0)",
+  "version": "0.2.0",
+  "description": "Swarm is a distributed storage platform and content distribution service, a native base layer service of the ethereum web3 stack (Swarm v0.4.2)",
   "avatar": "/ipfs/QmaGwyZCjAjHH6FkjGMk31bFphDG374xT5qws8ZGVgxPHP",
   "type": "library",
   "image": {
-    "path": "swarm.dnp.dappnode.eth_0.1.0.tar.xz",
-    "hash": "/ipfs/QmaHQrYdjEwkoARVhS5isRAg9BUrhQbr5FcBF8fBRPQt8d",
-    "size": 27003868,
+    "path": "swarm.dnp.dappnode.eth_0.2.0.tar.xz",
+    "hash": "/ipfs/QmRUArvvHHkTTcC2aNiB4gpzFEyLtf6ka4YLfuhHZSnARa",
+    "size": 21801606,
     "restart": "always",
     "volumes": [
       "swarm:/root/.ethereum"
@@ -34,12 +34,12 @@
   ],
   "license": "GPL-3.0",
   "homepage": {
-    "theswarm": "http://swarm.dappnode/bzz:/theswarm.eth/",
+    "theswarm": "http://swarm.dappnode/",
     "homepage": "https://github.com/dappnode/DAppNodePackage-swarm"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dappnode/DAppNodePackage-swarm.git"
+    "url": "https://github.com/dappnode/DAppNodePackage-swarm.git"
   },
   "bugs": {
     "url": "https://github.com/dappnode/DAppNodePackage-swarm/issues"
