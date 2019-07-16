@@ -2,8 +2,8 @@
   "name": "swarm.dnp.dappnode.eth",
   "version": "0.2.1",
   "upstreamVersion": "0.4.2",
-  "shortDescription": "serverless hosting, incentivised P2P storage and content distribution",
-  "description": "[Swarm](https://swarm-gateways.net/bzz:/theswarm.eth/) is a distributed storage platform and content distribution service, a native base layer service of the ethereum web3 stack. The primary objective of Swarm is to provide a decentralized and redundant store for dapp code and data as well as block chain and state data. Swarm is also set out to provide various base layer services for web3, including node-to-node messaging, media streaming, decentralised database services and scalable state-channel infrastructure for decentralised service economies. \n\n\n Learn about all you can do today with Swarm in the [Swarm documentation](https://swarm-guide.readthedocs.io/).",
+  "shortDescription": "Serverless hosting, P2P storage and content distribution",
+  "description": "[Swarm](https://swarm-gateways.net/bzz:/theswarm.eth/) is a distributed storage platform and content distribution service, a native base layer service of the ethereum web3 stack. The primary objective of Swarm is to provide a decentralized and redundant store for dapp code and data as well as block chain and state data. Swarm is also set out to provide various base layer services for web3, including node-to-node messaging, media streaming, decentralized database services and scalable state-channel infrastructure for decentralized service economies. \n\n\n Learn about all you can do today with Swarm in the [Swarm documentation](https://swarm-guide.readthedocs.io/).",
   "avatar": "/ipfs/QmaGwyZCjAjHH6FkjGMk31bFphDG374xT5qws8ZGVgxPHP",
   "type": "library",
   "image": {
