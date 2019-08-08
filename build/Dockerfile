@@ -2,8 +2,8 @@ FROM alpine:3.9 as build-swarm
 
 WORKDIR /usr/src/app
 
-# Swarm 0.4.2
-ENV BRANCH v0.4.2 
+# Swarm 0.4.3
+ENV BRANCH v0.4.3 
 
 RUN apk add --update git go make gcc musl-dev linux-headers bash pwgen
 RUN git clone -b ${BRANCH} https://github.com/ethersphere/swarm.git /usr/src/app && \
