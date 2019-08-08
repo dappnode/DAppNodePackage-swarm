@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   swarm.dnp.dappnode.eth:
-    image: 'swarm.dnp.dappnode.eth:0.2.0'
+    image: 'swarm.dnp.dappnode.eth:0.2.2'
     build: ./build
     ports:
       - '8500:8500'
