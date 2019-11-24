@@ -1,16 +1,19 @@
 version: '3.4'
 services:
   swarm.dnp.dappnode.eth:
-    image: 'swarm.dnp.dappnode.eth:0.2.2'
+    image: 'swarm.dnp.dappnode.eth:0.3.0'
     build: ./build
     ports:
-      - '8500:8500'
+      - '30399:30399'
+      - '30399:30399/udp'
     volumes:
       - 'swarm:/root/.ethereum'
     environment:
-      - PASSWORD=
-      - PORT=30399
-      - BZZPORT=8500
-    dns: 172.33.1
+      - ACCOUNT
+      - PASSWORD
+      - ENS
+      - BZZPORT=80
+      - EXTRA_OPTS=--enable-pinning
+    restart: always
 volumes:
   swarm: {}
