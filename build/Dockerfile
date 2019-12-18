@@ -10,7 +10,7 @@
 #  make swarm            
 
 
-FROM ethersphere/swarm:0.5.2 as swarm-docker
+FROM ethersphere/swarm:0.5.4 as swarm-docker
 
 FROM alpine:3.9 
 
